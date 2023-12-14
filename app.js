@@ -24,6 +24,9 @@ app.use("/api/actor", actorRouter);
 app.use("/api/movie", movieRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/admin", adminRouter);
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
 
 app.use("/*", handleNotFound);
 app.use(errorHandler);
