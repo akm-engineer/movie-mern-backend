@@ -5,6 +5,7 @@ const { isValidObjectId } = require("mongoose");
 const { generateOTP, generateMailTransporter } = require("../utils/mail");
 const { sendError, generateRandomBytes } = require("../utils/helper");
 const PasswordResetToken = require("../models/passwordResetToken");
+const PASSWORD_URL = process.env.PASSWORD_URL;
 
 exports.create = async (req, res) => {
   const { name, email, password } = req.body;
@@ -155,7 +156,7 @@ exports.forgetPassword = async (req, res) => {
   });
   await newPasswordResetToken.save();
 
-  const resetPasswordUrl = `http://localhost:3000/auth/reset-password?token=${token}&id=${user._id}`;
+  const resetPasswordUrl = `${PASSWORD_URL}/auth/reset-password?token=${token}&id=${user._id}`;
 
   const transport = generateMailTransporter();
 
