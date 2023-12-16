@@ -12,11 +12,12 @@ const Review = require("../models/review");
 const mongoose = require("mongoose");
 const { isValidObjectId } = mongoose;
 
-//Uploading a Trailer
+// Controller to upload a trailer for a movie
 exports.uploadTrailer = async (req, res) => {
   const { file } = req;
   if (!file) return sendError(res, "Video file is missing!");
 
+  // Upload the trailer to Cloudinary
   const { secure_url: url, public_id } = await cloudinary.uploader.upload(
     file.path,
     {
@@ -26,10 +27,11 @@ exports.uploadTrailer = async (req, res) => {
   res.status(201).json({ url, public_id });
 };
 
-//Creating a Movie
+// Controller to create a new movie
 exports.createMovie = async (req, res) => {
   const { file, body } = req;
 
+  // Extracting information from the request body
   const {
     title,
     storyLine,
@@ -45,6 +47,7 @@ exports.createMovie = async (req, res) => {
     language,
   } = body;
 
+  // Creating a new movie instance
   const newMovie = new Movie({
     title,
     storyLine,
@@ -58,6 +61,7 @@ exports.createMovie = async (req, res) => {
     language,
   });
 
+  // Validating and setting the director and writers
   if (director) {
     if (!isValidObjectId(director))
       return sendError(res, "Invalid director id!");
@@ -72,8 +76,9 @@ exports.createMovie = async (req, res) => {
     newMovie.writers = writers;
   }
 
-  // uploading poster
+  // Uploading the movie poster to Cloudinary
   if (file) {
+    // Transformation settings for the poster
     const {
       secure_url: url,
       public_id,
@@ -90,8 +95,11 @@ exports.createMovie = async (req, res) => {
       },
     });
 
+    // Constructing the final poster object
+
     const finalPoster = { url, public_id, responsive: [] };
 
+    // Extracting responsive poster URLs from Cloudinary response
     const { breakpoints } = responsive_breakpoints[0];
     if (breakpoints.length) {
       for (let imgObj of breakpoints) {
@@ -102,8 +110,10 @@ exports.createMovie = async (req, res) => {
     newMovie.poster = finalPoster;
   }
 
+  // Saving the new movie to the database
   await newMovie.save();
 
+  // Responding with the created movie information
   res.status(201).json({
     movie: {
       id: newMovie._id,
@@ -112,14 +122,18 @@ exports.createMovie = async (req, res) => {
   });
 };
 
+// Controller to update a movie without changing its poster
 exports.updateMovieWithoutPoster = async (req, res) => {
   const { movieId } = req.params;
 
+  // Validate the movie ID
   if (!isValidObjectId(movieId)) return sendError(res, "Invalid Movie ID!");
 
+  // Find the movie by ID
   const movie = await Movie.findById(movieId);
   if (!movie) return sendError(res, "Movie Not Found!", 404);
 
+  // Extracting updated movie information from the request body
   const {
     title,
     storyLine,
@@ -135,6 +149,7 @@ exports.updateMovieWithoutPoster = async (req, res) => {
     language,
   } = req.body;
 
+  // Updating the movie details
   movie.title = title;
   movie.storyLine = storyLine;
   movie.tags = tags;
@@ -146,12 +161,14 @@ exports.updateMovieWithoutPoster = async (req, res) => {
   movie.trailer = trailer;
   movie.language = language;
 
+  // Validating and updating the director
   if (director) {
     if (!isValidObjectId(director))
       return sendError(res, "Invalid director id!");
     movie.director = director;
   }
 
+  // Validating and updating the writers
   if (writers) {
     for (let writerId of writers) {
       if (!isValidObjectId(writerId))
@@ -161,22 +178,27 @@ exports.updateMovieWithoutPoster = async (req, res) => {
     movie.writers = writers;
   }
 
-  console.log(movie.id);
+  // Save the updated movie
   await movie.save();
 
+  // Respond with the updated movie information
   res.json({ message: "Movie is updated", movie });
 };
 
+// Controller to update a movie along with its poster
 exports.updateMovie = async (req, res) => {
   const { movieId } = req.params;
   const { file } = req;
+
+  // Validate the movie ID
   if (!isValidObjectId(movieId)) return sendError(res, "Invalid Movie ID!");
 
   // if (!req.file) return sendError(res, "Movie poster is missing!");
-
+  // Find the movie by ID
   const movie = await Movie.findById(movieId);
   if (!movie) return sendError(res, "Movie Not Found!", 404);
 
+  // Extracting updated movie information from the request body
   const {
     title,
     storyLine,
@@ -192,6 +214,7 @@ exports.updateMovie = async (req, res) => {
     language,
   } = req.body;
 
+  // Updating the movie details
   movie.title = title;
   movie.storyLine = storyLine;
   movie.tags = tags;
@@ -200,15 +223,16 @@ exports.updateMovie = async (req, res) => {
   movie.type = type;
   movie.genres = genres;
   movie.cast = cast;
-
   movie.language = language;
 
+  // Validating and updating the director
   if (director) {
     if (!isValidObjectId(director))
       return sendError(res, "Invalid director id!");
     movie.director = director;
   }
 
+  // Validating and updating the writers
   if (writers) {
     for (let writerId of writers) {
       if (!isValidObjectId(writerId))
@@ -228,7 +252,7 @@ exports.updateMovie = async (req, res) => {
         return sendError(res, "Could not update poster at the moment!");
       }
 
-      // uploading poster
+      // Upload the new poster to Cloudinary
       const {
         secure_url: url,
         public_id,
@@ -245,8 +269,10 @@ exports.updateMovie = async (req, res) => {
         },
       });
 
+      // Construct the final poster object
       const finalPoster = { url, public_id, responsive: [] };
 
+      // Extract responsive poster URLs from Cloudinary response
       const { breakpoints } = responsive_breakpoints[0];
       if (breakpoints.length) {
         for (let imgObj of breakpoints) {
@@ -261,6 +287,7 @@ exports.updateMovie = async (req, res) => {
 
   await movie.save();
 
+  // Respond with the updated movie information
   res.json({
     message: "Movie is updated",
     movie: {
@@ -273,6 +300,7 @@ exports.updateMovie = async (req, res) => {
   });
 };
 
+// Controller to remove a movie
 exports.removeMovie = async (req, res) => {
   const { movieId } = req.params;
 
@@ -305,14 +333,17 @@ exports.removeMovie = async (req, res) => {
   res.json({ message: "Movie removed successfully." });
 };
 
+// Controller to get a list of movies
 exports.getMovies = async (req, res) => {
   const { pageNo = 0, limit = 10 } = req.query;
 
+  // Query movies from the database
   const movies = await Movie.find({})
     .sort({ createdAt: -1 })
     .skip(parseInt(pageNo) * parseInt(limit))
     .limit(parseInt(limit));
 
+  // Format the movie data for response
   const results = movies.map((movie) => ({
     id: movie._id,
     title: movie.title,
@@ -322,18 +353,22 @@ exports.getMovies = async (req, res) => {
     status: movie.status,
   }));
 
+  // Respond with the list of movies
   res.json({ movies: results });
 };
 
+// Controller to get movie details for update
 exports.getMovieForUpdate = async (req, res) => {
   const { movieId } = req.params;
 
   if (!isValidObjectId(movieId)) return sendError(res, "Id is invalid");
 
+  // Find the movie by ID and populate related data
   const movie = await Movie.findById(movieId).populate(
     "director writers cast.actor"
   );
 
+  // Respond with formatted movie data for update
   res.json({
     movie: {
       id: movie._id,
@@ -361,6 +396,7 @@ exports.getMovieForUpdate = async (req, res) => {
   });
 };
 
+// Controller to search for movies
 exports.searchMovies = async (req, res) => {
   const { title } = req.query;
   if (!title.trim()) return sendError(res, "Invalid request!!");
@@ -378,13 +414,16 @@ exports.searchMovies = async (req, res) => {
   });
 };
 
+// Controller to get latest movie uploads
 exports.getLatestUploads = async (req, res) => {
   const { limit = 5 } = req.query;
 
+  // Query latest public movies from the database
   const results = await Movie.find({ status: "public" })
     .sort("-createdAt")
     .limit(parseInt(limit));
 
+  // Format the movie data for response
   const movies = results.map((m) => {
     return {
       id: m._id,
@@ -398,11 +437,12 @@ exports.getLatestUploads = async (req, res) => {
   res.json({ movies });
 };
 
+// Controller to get details of a single movie
 exports.getSingleMovie = async (req, res) => {
   const { movieId } = req.params;
 
   // mongoose.Types.ObjectId(movieId)
-
+  // Validate the movie ID
   if (!isValidObjectId(movieId))
     return sendError(res, "Movie id is not valid!");
 
@@ -410,6 +450,7 @@ exports.getSingleMovie = async (req, res) => {
     "director writers cast.actor"
   );
 
+  // Aggregate and calculate average ratings for the movie
   const [aggregatedResponse] = await Review.aggregate(
     averageRatingPipeline(movie._id)
   );
@@ -421,6 +462,8 @@ exports.getSingleMovie = async (req, res) => {
     reviews.ratingAvg = parseFloat(ratingAvg).toFixed(1);
     reviews.reviewCount = reviewCount;
   }
+
+  // Respond with the formatted movie data
   const {
     _id: id,
     title,
@@ -472,16 +515,19 @@ exports.getSingleMovie = async (req, res) => {
   });
 };
 
+// Controller to get related movies for a given movie
 exports.getRelatedMovies = async (req, res) => {
   const { movieId } = req.params;
   if (!isValidObjectId(movieId)) return sendError(res, "Invalid movie id!");
 
   const movie = await Movie.findById(movieId);
 
+  // Aggregate related movies based on movie tags
   const movies = await Movie.aggregate(
     relatedMovieAggregation(movie.tags, movie._id)
   );
 
+  // Map movies and retrieve average ratings
   const mapMovies = async (m) => {
     const reviews = await getAverageRatings(m._id);
 
@@ -498,9 +544,11 @@ exports.getRelatedMovies = async (req, res) => {
   res.json({ movies: relatedMovies });
 };
 
+// Controller to get top-rated movies
 exports.getTopRatedMovies = async (req, res) => {
   const { type = "Film" } = req.query;
 
+  // Aggregate top-rated movies based on the provided type
   const movies = await Movie.aggregate(topRatedMoviesPipeline(type));
 
   const mapMovies = async (m) => {
@@ -515,21 +563,27 @@ exports.getTopRatedMovies = async (req, res) => {
     };
   };
 
+  // Get top-rated movies data
   const topRatedMovies = await Promise.all(movies.map(mapMovies));
 
+  // Respond with the top-rated movies data
   res.json({ movies: topRatedMovies });
 };
 
+// Controller to search for public movies
 exports.searchPublicMovies = async (req, res) => {
   const { title } = req.query;
 
+  // Validate the search query
   if (!title.trim()) return sendError(res, "Invalid request!");
 
+  // Query public movies from the database
   const movies = await Movie.find({
     title: { $regex: title, $options: "i" },
     status: "public",
   });
 
+  // Map movies and retrieve average ratings
   const mapMovies = async (m) => {
     const reviews = await getAverageRatings(m._id);
 
@@ -542,6 +596,7 @@ exports.searchPublicMovies = async (req, res) => {
     };
   };
 
+  // Get search results data
   const results = await Promise.all(movies.map(mapMovies));
 
   res.json({

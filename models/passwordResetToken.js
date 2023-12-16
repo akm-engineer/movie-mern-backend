@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+// Define password reset token schema
 const passwordResendTokenSchema = mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,6 +18,8 @@ const passwordResendTokenSchema = mongoose.Schema({
     default: Date.now(),
   },
 });
+
+// Middleware to hash the token before saving
 passwordResendTokenSchema.pre("save", async function (next) {
   if (this.isModified("token")) {
     this.token = await bcrypt.hash(this.token, 10);

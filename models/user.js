@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+//Define user schema
 const userSchema = mongoose.Schema({
   name: {
     type: String,
@@ -29,6 +30,7 @@ const userSchema = mongoose.Schema({
     enum: ["admin", "user"],
   },
 });
+
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);

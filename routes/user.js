@@ -18,18 +18,29 @@ const {
 const { isValidPassResetTken } = require("../middlewares/user");
 const { isAuth } = require("../middlewares/auth.js");
 const router = express.Router();
-
+// Route to create a new user
 router.post("/create", userValiator, validate, create);
+
+// Route to sign in a user
 router.post("/sign-in", signInValidator, validate, signIn);
 
+// Route to verify a user's email
 router.post("/verify-email", verifyEmail);
+
+// Route to resend email verification token
 router.post("/resend-verify-token", resendEmailVerification);
+
+// Route to initiate the forget password process
 router.post("/forget-password", forgetPassword);
+
+// Route to verify a password reset token
 router.post(
   "/verify-password-reset-token",
   isValidPassResetTken,
   sendResetPasswordTokenStatus
 );
+
+// Route to reset user's password
 router.post(
   "/reset-password",
   validatePassword,
@@ -37,6 +48,8 @@ router.post(
   isValidPassResetTken,
   resetPassword
 );
+
+// Route to check if a user is authenticated
 router.get("/is-auth", isAuth, (req, res) => {
   const { user } = req;
   res.json({
@@ -50,4 +63,5 @@ router.get("/is-auth", isAuth, (req, res) => {
     },
   });
 });
+
 module.exports = router;

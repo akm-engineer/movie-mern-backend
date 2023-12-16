@@ -1,12 +1,12 @@
 const express = require("express");
 require("express-async-errors");
-const morgan = require("morgan");
+const morgan = require("morgan"); // Logging middleware
 const { errorHandler } = require("./middlewares/error");
-const cors = require("cors");
+const cors = require("cors"); // CORS middleware
 // const path = require("path");
 
 require("dotenv").config();
-require("./db");
+require("./db"); // Connect to the database
 const userRouter = require("./routes/user");
 const actorRouter = require("./routes/actor");
 const movieRouter = require("./routes/movie");
@@ -18,7 +18,7 @@ const { handleNotFound } = require("./utils/helper");
 const app = express();
 app.use(cors()); //solving CORS error
 app.use(express.json()); // for parsing application/json
-app.use(morgan("dev"));
+app.use(morgan("dev")); // Logging HTTP requests in development mode
 app.use("/api/user", userRouter);
 app.use("/api/actor", actorRouter);
 app.use("/api/movie", movieRouter);

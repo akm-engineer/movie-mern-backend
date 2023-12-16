@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define actor schema
 const actorSchema = mongoose.Schema(
   {
     name: {

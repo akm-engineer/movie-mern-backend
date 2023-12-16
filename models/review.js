@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+//Define movie review schema
 const reviewSchema = mongoose.Schema({
   // owner parentMovie rating content
   owner: {

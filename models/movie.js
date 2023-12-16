@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const genres = require("../utils/genres");
 
+// Define movie schema
 const movieSchema = mongoose.Schema(
   {
     title: {

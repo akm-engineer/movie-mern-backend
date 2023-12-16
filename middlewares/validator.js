@@ -1,6 +1,8 @@
 const { check, validationResult } = require("express-validator");
 const genres = require("../utils/genres");
 const { isValidObjectId } = require("mongoose");
+
+// User registration validation middleware
 exports.userValiator = [
   check("name").trim().not().isEmpty().withMessage("Name is Missing..."),
   check("email").normalizeEmail().isEmail().withMessage("Email is invalid"),
@@ -13,6 +15,7 @@ exports.userValiator = [
     .withMessage("the password must be 8-20 characters long.."),
 ];
 
+// Common validation middleware for handling validation results
 exports.validate = (req, res, next) => {
   const error = validationResult(req).array();
   if (error.length) {
@@ -21,6 +24,7 @@ exports.validate = (req, res, next) => {
   next();
 };
 
+// Password validation middleware for updating password
 exports.validatePassword = [
   check("newPassword")
     .trim()
@@ -30,6 +34,8 @@ exports.validatePassword = [
     .isLength({ min: 8, max: 20 })
     .withMessage("the password must be 8-20 characters long.."),
 ];
+
+// Sign-in validation middleware
 exports.signInValidator = [
   check("email").normalizeEmail().isEmail().withMessage("Email is invalid"),
   check("password")
@@ -39,6 +45,7 @@ exports.signInValidator = [
     .withMessage("Password is Missing..."),
 ];
 
+// Actor information validation middleware
 exports.actorInfoValidator = [
   check("name").trim().not().isEmpty().withMessage("Name is Missing..."),
   check("about")
@@ -53,6 +60,7 @@ exports.actorInfoValidator = [
     .withMessage("Please specify the gender ..."),
 ];
 
+// Movie validation middleware
 exports.validateMovie = [
   check("title").trim().not().isEmpty().withMessage("Movie title is missing!"),
   check("storyLine")
@@ -102,6 +110,7 @@ exports.validateMovie = [
     }),
 ];
 
+// Trailer validation middleware
 (exports.validateTrailer = check("trailer")
   .isObject()
   .withMessage("trailer must be an object with url and public_id")
@@ -125,6 +134,7 @@ exports.validateMovie = [
     return true;
   });
 
+// Ratings validation middleware
 exports.validateRatings = check(
   "rating",
   "Rating must be a number between 0 and 10."
