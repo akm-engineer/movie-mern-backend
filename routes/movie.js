@@ -24,6 +24,7 @@ const { parseData } = require("../utils/helper");
 const router = express.Router();
 
 //--------------ADMIN Only
+
 // Route to upload a movie trailer
 router.post(
   "/upload-trailer",
